@@ -96,13 +96,13 @@ func process(delta=0):
 
 func set_state(state_name):
 	state_time=0
-	var old_state=current_state_name
+	var old_state_name=current_state_name
 	
 	current_state_name=state_name
 	current_state=states[current_state_name]
 	_repopulate_links()
 	
-	emit_signal("state_changed", old_state, new_state, get_current_state_attributes())
+	emit_signal("state_changed", old_state_name, state_name, get_current_state_attributes())
 
 #get_groups_attributes
 func get_current_state_attributes():

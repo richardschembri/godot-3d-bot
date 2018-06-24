@@ -8,9 +8,7 @@ export(float) var turn_speed = 0.2
 
 var current_speed = 0;
 var current_strafe_speed = 0;
-# class member variables go here, for example:
-# var a = 2
-# var b = "textvar"
+
 enum ACTION_STATE{
   SLEEP,
   ADVANCE,
@@ -29,12 +27,28 @@ var path_endpoint = Vector3()
 var nav_path_endpoint = Vector3()
 var fsm # finite state machine
 
+const FSM_GROUP_MAIN = "main"
+const FSM_STATE_DECIDE = "decide"
+const FSM_STATE_WAIT = "wait"
+const FSM_STATE_TURN = "turn"
+const FSM_STATE_MOVE = "move"
+const FSM_STATE_SLEEP = "sleep" 
+const bot_states=[FSM_STATE_SLEEP,FSM_STATE_MOVE,FSM_STATE_TURN,FSM_STATE_WAIT]
+
+var current_state_attributes={
+	move=false,
+	follow_target=false,
+	track_target = true,
+	track_path = true
+}
+
+
 # Godot Methods
 func _ready():
 	_init_finite_state_machine()
 	set_target(target_node_path)
 	set_navigation(navigation_node_path)
-	set_path()
+
 
 func _process(delta):
 	pass
@@ -46,17 +60,14 @@ func _physics_process(delta):
 	track_path()
 	move_to_target()
 
-const FSM_GROUP_MAIN = "main"
-const FSM_STATE_DECIDE = "decide"
-const FSM_STATE_WAIT = "wait"
-const FSM_STATE_TURN = "turn"
-const FSM_STATE_MOVE = "move"
-const FSM_STATE_SLEEP = "sleep" 
+func _process_current_state(delta):
+	if current_state_attributes.track_target:
+		track_target()
+	if current_state_attributes.track_path:
+		track_path()
+	pass
 
-var current_state_attributes={
-	move=false,
-	follow_target=false
-}
+
 
 func _init_finite_state_machine():
 	fsm = preload("res://addons/godot-3d-bot/finite_state_machine.gd").new()
@@ -72,7 +83,7 @@ func _init_finite_state_machine():
 	fsm.link_states(FSM_STATE_MOVE, FSM_STATE_DECIDE, fsm.LINK_TYPE.TIMEOUT, [2])
 	fsm.link_states(FSM_STATE_MOVE, FSM_STATE_DECIDE, fsm.LINK_TYPE.TIMEOUT, [2])
 	
-	fsm.link_states(FSM_GROUP_MAIN, FSM_STATE_SLEEP, fsm.LINK_TYPE.CONDITION,[self,"fsm_is_near_target",true])
+	fsm.link_states(FSM_GROUP_MAIN, FSM_STATE_SLEEP, fsm.LINK_TYPE.CONDITION,[self,"is_near_target",true])
 	fsm.link_states(FSM_STATE_DECIDE, FSM_STATE_WAIT, fsm.LINK_TYPE.CONDITION,[self,"fsm_has_no_target",true])
 	fsm.link_states(FSM_STATE_DECIDE, FSM_STATE_MOVE, fsm.LINK_TYPE.CONDITION,[self,"fsm_has_no_target",false])	
 	
@@ -81,14 +92,16 @@ func _init_finite_state_machine():
 	fsm.connect("state_changed",self,"fsm_state_changed") # connect signals
 	pass
 
-func fsm_state_changed(state_from, state_to, params):
-	pass
+func fsm_state_changed(old_state_name, new_state_name, new_state_attributes):
+	print("Bot State: " + new_state_name)
+	if new_state_name == FSM_STATE_MOVE:
+		set_path()
 
-func fsm_is_near_target():
-	return true
+func is_near_target():
+	return self_pos.distance_to(target.get_global_transform().origin) < abs($ray_proximity_front.cast_to.z)
 
 func fsm_has_no_target():
-	return false
+	return target == null
 
 func track_target():
 	if (target==null):
@@ -117,18 +130,6 @@ func turn(right = true):
 
 func turn_by(turn_radians):
 	self.rotate_y(turn_radians)
-
-#func turn_to_target():
-#	if target == null:
-#		return
-#	var tt_rotation = $target_tracker.get_rotation()
-#	if tt_rotation.y < -0.1:
-#		turn(false)
-#	elif tt_rotation.y > 0.1:
-#		turn()
-#	elif tt_rotation.y > -0.1 and tt_rotation.y < 0.1: 
-#		var target_origin = target.get_global_transform().origin
-#		face_point(target_origin)
 
 func turn_to_target():
 	if not turn_to_tracker($target_tracker) && target != null: 
