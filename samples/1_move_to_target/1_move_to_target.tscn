@@ -2,7 +2,7 @@
 
 [ext_resource path="res://addons/godot-3d-bot/BasicBot.tscn" type="PackedScene" id=1]
 
-[sub_resource type="SpatialMaterial" id=8]
+[sub_resource type="SpatialMaterial" id=1]
 
 render_priority = 0
 flags_transparent = false
@@ -53,7 +53,7 @@ uv2_triplanar_sharpness = 1.0
 proximity_fade_enable = false
 distance_fade_enable = false
 
-[sub_resource type="CubeMesh" id=9]
+[sub_resource type="CubeMesh" id=2]
 
 custom_aabb = AABB( 0, 0, 0, 0, 0, 0 )
 size = Vector3( 2, 2, 2 )
@@ -61,7 +61,7 @@ subdivide_width = 0
 subdivide_height = 0
 subdivide_depth = 0
 
-[sub_resource type="SpatialMaterial" id=10]
+[sub_resource type="SpatialMaterial" id=3]
 
 render_priority = 0
 flags_transparent = false
@@ -112,7 +112,7 @@ uv2_triplanar_sharpness = 1.0
 proximity_fade_enable = false
 distance_fade_enable = false
 
-[sub_resource type="CubeMesh" id=11]
+[sub_resource type="CubeMesh" id=4]
 
 custom_aabb = AABB( 0, 0, 0, 0, 0, 0 )
 size = Vector3( 2, 2, 2 )
@@ -120,7 +120,7 @@ subdivide_width = 0
 subdivide_height = 0
 subdivide_depth = 0
 
-[sub_resource type="PlaneShape" id=12]
+[sub_resource type="PlaneShape" id=5]
 
 plane = Plane( 0, 1, 0, 0 )
 _sections_unfolded = [ "Resource" ]
@@ -183,7 +183,7 @@ material = SubResource( 6 )
 custom_aabb = AABB( 0, 0, 0, 0, 0, 0 )
 size = Vector2( 100, 100 )
 
-[sub_resource type="Environment" id=13]
+[sub_resource type="Environment" id=8]
 
 background_mode = 0
 background_sky_custom_fov = 0.0
@@ -262,7 +262,7 @@ adjustment_contrast = 1.0
 adjustment_saturation = 1.0
 _sections_unfolded = [ "Ambient Light" ]
 
-[sub_resource type="SpatialMaterial" id=14]
+[sub_resource type="SpatialMaterial" id=9]
 
 render_priority = 0
 flags_transparent = false
@@ -318,9 +318,9 @@ proximity_fade_enable = false
 distance_fade_enable = false
 _sections_unfolded = [ "Albedo", "Emission" ]
 
-[sub_resource type="CubeMesh" id=15]
+[sub_resource type="CubeMesh" id=10]
 
-material = SubResource( 14 )
+material = SubResource( 9 )
 custom_aabb = AABB( 0, 0, 0, 0, 0, 0 )
 size = Vector3( 2, 2, 2 )
 subdivide_width = 0
@@ -342,7 +342,7 @@ target_node_path = NodePath("../target")
 
 transform = Transform( 0.237504, 0, 0, 0, 0.237504, 0, 0, 0, 0.237504, 0, 0, 0 )
 layers = 1
-material_override = SubResource( 8 )
+material_override = SubResource( 1 )
 cast_shadow = 1
 extra_cull_margin = 0.0
 use_in_baked_light = false
@@ -350,7 +350,7 @@ lod_min_distance = 0.0
 lod_min_hysteresis = 0.0
 lod_max_distance = 0.0
 lod_max_hysteresis = 0.0
-mesh = SubResource( 9 )
+mesh = SubResource( 2 )
 skeleton = NodePath("..")
 material/0 = null
 _sections_unfolded = [ "Transform" ]
@@ -359,7 +359,7 @@ _sections_unfolded = [ "Transform" ]
 
 transform = Transform( 0.039546, 0, 0, 0, 0.039546, 0, 0, 0, 1, 0, 0, -1.21137 )
 layers = 1
-material_override = SubResource( 10 )
+material_override = SubResource( 3 )
 cast_shadow = 1
 extra_cull_margin = 0.0
 use_in_baked_light = false
@@ -367,7 +367,7 @@ lod_min_distance = 0.0
 lod_min_hysteresis = 0.0
 lod_max_distance = 0.0
 lod_max_hysteresis = 0.0
-mesh = SubResource( 11 )
+mesh = SubResource( 4 )
 skeleton = NodePath("..")
 material/0 = null
 _sections_unfolded = [ "Transform" ]
@@ -385,13 +385,13 @@ constant_angular_velocity = Vector3( 0, 0, 0 )
 
 [node name="CollisionShape" type="CollisionShape" parent="ground" index="0"]
 
-shape = SubResource( 12 )
+shape = SubResource( 5 )
 disabled = false
 
 [node name="CollisionShape1" type="CollisionShape" parent="ground" index="1"]
 
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0 )
-shape = SubResource( 12 )
+shape = SubResource( 5 )
 disabled = false
 
 [node name="Quad" type="MeshInstance" parent="ground" index="2"]
@@ -413,7 +413,7 @@ _sections_unfolded = [ "Transform" ]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." index="2"]
 
-environment = SubResource( 13 )
+environment = SubResource( 8 )
 
 [node name="Camera" type="Camera" parent="." index="3"]
 
@@ -443,7 +443,7 @@ lod_min_distance = 0.0
 lod_min_hysteresis = 0.0
 lod_max_distance = 0.0
 lod_max_hysteresis = 0.0
-mesh = SubResource( 15 )
+mesh = SubResource( 10 )
 skeleton = NodePath("..")
 material/0 = null
 _sections_unfolded = [ "Geometry", "LOD", "Transform", "Visibility", "material" ]

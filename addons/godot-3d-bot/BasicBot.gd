@@ -27,6 +27,7 @@ const UP=Vector3(0,1,0)
 var path = []
 var path_endpoint = Vector3()
 var nav_path_endpoint = Vector3()
+var fsm # finite state machine
 
 # Godot Methods
 func _ready():
@@ -42,7 +43,41 @@ func _physics_process(delta):
 	track_target()
 	track_path()
 	move_to_target()
+
+const FSM_GROUP_MAIN = "main"
+const FSM_STATE_DECIDE = "decide"
+const FSM_STATE_WAIT = "wait"
+const FSM_STATE_TURN = "turn"
+const FSM_STATE_MOVE = "move"
+const FSM_STATE_SLEEP = "sleep" 
+
+func _init_finite_state_machine():
+	fsm = preload("res://addons/godot-3d-bot/finite_state_machine.gd")
+	var foo = fsm.LINK_TYPE.TIMEOUT
+
+	fsm.add_group(FSM_GROUP_MAIN, {follow=false})
+	fsm.add_state(FSM_STATE_DECIDE, null, FSM_GROUP_MAIN) # no attributes
+	fsm.add_state(FSM_STATE_WAIT, {move=false}, FSM_GROUP_MAIN) # do not move whilst in this state
+	fsm.add_state(FSM_STATE_TURN, {move=false}, FSM_GROUP_MAIN)
+	fsm.add_state(FSM_STATE_MOVE, {move=true}, FSM_GROUP_MAIN)
+	fsm.add_state(FSM_STATE_SLEEP, {move=true, follow=false}, FSM_GROUP_MAIN)
 	
+	fsm.link_states(FSM_STATE_WAIT, FSM_STATE_DECIDE, fsm.LINK_TYPE.TIMEOUT, [0.2])
+	fsm.link_states(FSM_STATE_MOVE, FSM_STATE_DECIDE, fsm.LINK_TYPE.TIMEOUT, [2])
+	fsm.link_states(FSM_STATE_MOVE, FSM_STATE_DECIDE, fsm.LINK_TYPE.TIMEOUT, [2])
+	
+	fsm.link_states(FSM_GROUP_MAIN, FSM_STATE_SLEEP, fsm.LINK_TYPE.CONDITION,[self,"fsm_is_near_target",true])
+	fsm.link_states(FSM_STATE_DECIDE, FSM_STATE_WAIT, fsm.LINK_TYPE.CONDITION,[self,"fsm_has_no_target",true])
+	fsm.link_states(FSM_STATE_DECIDE, FSM_STATE_MOVE, fsm.LINK_TYPE.CONDITION,[self,"fsm_has_no_target",false])	
+	
+	fsm.set_state(FSM_STATE_DECIDE)
+	
+	fsm_action.connect("state_changed",self,"fsm_state_changed") # connect signals
+	pass
+
+func fsm_state_changed(state_from, state_to, params):
+	pass
+
 func track_target():
 	if (target==null):
 		return
