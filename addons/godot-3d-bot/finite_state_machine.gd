@@ -1,13 +1,13 @@
 extends Node
 
 class Group:
-	var parent=null
+	var parent_group_name=null
 	var links=null
 	var attributes=null
 
 class State:
 	var attributes=null
-	var parent=null
+	var group_name=null
 	var links=null
 
 class Link:
@@ -64,14 +64,14 @@ var timers={}
 var groups={}
 var states={}
 var state_time=0
+var current_state_name=null
 var current_state=null
-var current_state_object=null
 var links=[]
 
 signal state_changed(state_from,state_to,params)
 
 func process(delta=0):
-	if current_state==null or current_state_object==null or links.size()==0:
+	if current_state_name==null or current_state==null or links.size()==0:
 		return
 	
 	state_time+=delta
@@ -81,45 +81,46 @@ func process(delta=0):
 	for link in links:
 		var condition=true
 		var found=false
-		if link.type=="timeout" or link.type=="timed condition":
+		if link.type==LINK_TYPE.TIMEOUT or link.type==LINK_TYPE.TIMED_CONDITION:
 			if link.timer!=null:
 				condition=timers[link.timer]>link.timeout
 			else:
 				condition=state_time>link.timeout
 			found=true
-		if condition and (link.type=="condition" or link.type=="timed condition") and link.condition_owner.has_method(link.condition_method):
+		if condition and (link.type==LINK_TYPE.CONDITION or link.type==LINK_TYPE.TIMED_CONDITION) and link.condition_owner.has_method(link.condition_method):
 			condition=condition and (link.condition_owner.callv(link.condition_method,link.condition_arguments)==link.condition_expected)
 			found=true
 		if condition and found:
 			set_state(link.next_state)
 			return
 
-func set_state(new_state):
+func set_state(state_name):
 	state_time=0
-	var old_state=current_state
+	var old_state=current_state_name
 	
-	current_state=new_state
-	current_state_object=states[current_state]
-	_rebuild_links()
+	current_state_name=state_name
+	current_state=states[current_state_name]
+	_repopulate_links()
 	
-	emit_signal("state_changed",old_state,new_state,get_groups_attributes())
+	emit_signal("state_changed", old_state, new_state, get_current_state_attributes())
 
-func get_groups_attributes():
+#get_groups_attributes
+func get_current_state_attributes():
 	var attributes
-	if current_state_object.parent!=null:
-		attributes=get_group_attributes(current_state_object.parent)
+	if current_state.group_name!=null:
+		attributes=get_group_attributes(current_state.group_name)
 	else:
 		attributes={}
-	if current_state_object.attributes!=null:
-		for a in current_state_object.attributes.keys():
-			attributes[a]=current_state_object.attributes[a]
+	if current_state.attributes!=null:
+		for a in current_state.attributes.keys():
+			attributes[a]=current_state.attributes[a]
 	return attributes
 
 func get_group_attributes(group_name):
 	var attributes
 	var g=groups[group_name]
-	if g.parent!=null:
-		attributes=get_group_attributes(g.parent)
+	if g.parent_group_name!=null:
+		attributes=get_group_attributes(g.parent_group_name)
 	else:
 		attributes={}
 	if g.attributes!=null:
@@ -127,40 +128,41 @@ func get_group_attributes(group_name):
 			attributes[a]=g.attributes[a]
 	return attributes
 
-func _rebuild_links():
+func _repopulate_links():
 	links=[]
-	if current_state_object.parent!=null:
-		_fill_links(current_state_object.parent)
-	if current_state_object.links!=null:
-		for l in current_state_object.links:
+	if current_state.group_name!=null:
+		_populate_links(current_state.group_name)
+	if current_state.links!=null:
+		for l in current_state.links:
 			links.append(l)
 
-func _fill_links(group):
-	if not groups.has(group):
+# _fill_links
+func _populate_links(group_name):
+	if not groups.has(group_name):
 		return
 	
-	var group_instance=groups[group]
-	if group_instance.parent!=null:
-		_fill_links(group_instance.parent)
-	if group_instance.links!=null:
-		for l in group_instance.links:
+	var group=groups[group_name]
+	if group.parent_group_name!=null:
+		_populate_links(group.parent_group_name)
+	if group.links!=null:
+		for l in group.links:
 			links.append(l)
 
-func add_group(name,attributes=null,parent=null):
-	var instance=Group.new()
+func add_group(group_name,attributes=null,parent_group_name=null):
+	var new_group=Group.new()
 	if attributes!=null:
-		instance.attributes=attributes
-	if parent!=null:
-		instance.parent=parent
-	groups[name]=instance
+		new_group.attributes=attributes
+	if parent_group_name!=null:
+		new_group.parent_group_name=parent_group_name
+	groups[group_name]=new_group
 
-func add_state(name,attributes=null,group=null):
+func add_state(state_name,attributes=null,group_name=null):
 	var new_state=State.new()
 	if attributes!=null:
 		new_state.attributes=attributes
-	if group!=null:
-		new_state.parent=group
-	states[name]=new_state
+	if group_name!=null:
+		new_state.group_name=group_name
+	states[state_name]=new_state
 
 func link_states(state,next_state,type,params):
 	if states.has(state):
@@ -177,7 +179,7 @@ func _link_states(instance,next_state,type,params):
 		LINK_TYPE.CONDITION:
 			link.add_condition(params)
 		LINK_TYPE.TIMEOUT:
-			link.add_timout(params)
+			link.add_timeout(params)
 		LINK_TYPE.TIMED_CONDITION:
 			link.add_timed_condition(params)
 	

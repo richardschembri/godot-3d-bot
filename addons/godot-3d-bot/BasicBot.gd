@@ -31,6 +31,7 @@ var fsm # finite state machine
 
 # Godot Methods
 func _ready():
+	_init_finite_state_machine()
 	set_target(target_node_path)
 	set_navigation(navigation_node_path)
 	set_path()
@@ -40,6 +41,7 @@ func _process(delta):
 	
 func _physics_process(delta):
 	self_pos = self.get_global_transform().origin
+	fsm.process(delta)
 	track_target()
 	track_path()
 	move_to_target()
@@ -51,9 +53,13 @@ const FSM_STATE_TURN = "turn"
 const FSM_STATE_MOVE = "move"
 const FSM_STATE_SLEEP = "sleep" 
 
+var current_state_attributes={
+	move=false,
+	follow_target=false
+}
+
 func _init_finite_state_machine():
-	fsm = preload("res://addons/godot-3d-bot/finite_state_machine.gd")
-	var foo = fsm.LINK_TYPE.TIMEOUT
+	fsm = preload("res://addons/godot-3d-bot/finite_state_machine.gd").new()
 
 	fsm.add_group(FSM_GROUP_MAIN, {follow=false})
 	fsm.add_state(FSM_STATE_DECIDE, null, FSM_GROUP_MAIN) # no attributes
@@ -72,11 +78,17 @@ func _init_finite_state_machine():
 	
 	fsm.set_state(FSM_STATE_DECIDE)
 	
-	fsm_action.connect("state_changed",self,"fsm_state_changed") # connect signals
+	fsm.connect("state_changed",self,"fsm_state_changed") # connect signals
 	pass
 
 func fsm_state_changed(state_from, state_to, params):
 	pass
+
+func fsm_is_near_target():
+	return true
+
+func fsm_has_no_target():
+	return false
 
 func track_target():
 	if (target==null):
