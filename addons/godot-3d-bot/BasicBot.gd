@@ -38,8 +38,8 @@ const bot_states=[FSM_STATE_SLEEP,FSM_STATE_MOVE,FSM_STATE_TURN,FSM_STATE_WAIT]
 var current_state_attributes={
 	move=false,
 	follow_target=false,
-	track_target = true,
-	track_path = true
+	track_target = false,
+	track_path = false
 }
 
 
@@ -94,8 +94,14 @@ func _init_finite_state_machine():
 
 func fsm_state_changed(old_state_name, new_state_name, new_state_attributes):
 	print("Bot State: " + new_state_name)
+	
+	if new_state_attributes != null:
+		for att_key in new_state_attributes.keys():
+			current_state_attributes[att_key] = new_state_attributes[att_key]
+
 	if new_state_name == FSM_STATE_MOVE:
 		set_path()
+	
 
 func is_near_target():
 	return self_pos.distance_to(target.get_global_transform().origin) < abs($ray_proximity_front.cast_to.z)

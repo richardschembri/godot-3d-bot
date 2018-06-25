@@ -95,6 +95,8 @@ func process(delta=0):
 			return
 
 func set_state(state_name):
+	if (state_name == current_state_name):
+		return
 	state_time=0
 	var old_state_name=current_state_name
 	
@@ -115,6 +117,14 @@ func get_current_state_attributes():
 		for a in current_state.attributes.keys():
 			attributes[a]=current_state.attributes[a]
 	return attributes
+
+# WIP
+func set_corresponding_attributes(attributes):
+	var current_state_attributes = get_current_state_attributes()
+	if current_state_attributes != null:
+		for att_key in current_state_attributes.keys():
+			attributes[att_key] = current_state_attributes[att_key]
+		
 
 func get_group_attributes(group_name):
 	var attributes
