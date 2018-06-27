@@ -113,7 +113,7 @@ func track_target():
 	if (target==null):
 		return
 	var target_origin = target.get_global_transform().origin
-	var track_pos =  Vector3(target_origin[0], get_translation()[1], target_origin[2]) # current_target_ref.get_global_transform().origin
+	var track_pos =  Vector3(target_origin.x, $target_tracker.get_translation().y, target_origin.z) # current_target_ref.get_global_transform().origin
 	if $target_tracker.get_global_transform().origin != track_pos:
 		var tracker_transform = $target_tracker.get_global_transform().looking_at(track_pos, UP)
 		$target_tracker.set_global_transform(tracker_transform)
@@ -123,7 +123,7 @@ func track_path():
 		track_path_point(path[0])
 
 func track_path_point(point):
-	var point_pos =  Vector3(point.x, get_translation().y, point.z)
+	var point_pos =  Vector3(point.x, $path_tracker.get_translation().y, point.z)
 	if ($path_tracker.get_global_transform().origin != point_pos):
 		var tracker_transform = $path_tracker.get_global_transform().looking_at(point_pos, UP)  
 		$path_tracker.set_global_transform(tracker_transform)
