@@ -239,7 +239,7 @@ _sections_unfolded = [ "Transform", "Visibility" ]
 
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.24044, 3.27983, 0 )
 _sections_unfolded = [ "Transform" ]
-turn_speed = 0.05
+turn_speed = 1.0
 character_model_path = NodePath("robot")
 target_node_path = NodePath("../target")
 

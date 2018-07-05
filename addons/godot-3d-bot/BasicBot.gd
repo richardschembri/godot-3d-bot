@@ -75,12 +75,16 @@ func _physics_process(delta):
 
 
 func _process_current_state(delta):
+		
+	if current_state_attributes.track_path:
+		turn_to_path(delta)
+	elif current_state_attributes.track_target:
+		turn_to_target(delta)
+	
 	if current_state_attributes.track_target:
 		track_target()
-		turn_to_target()
 	if current_state_attributes.track_path:
 		track_path()
-		turn_to_path()
 	pass
 
 func _integrate_forces(state):
@@ -164,30 +168,44 @@ func track_path_point(point):
 		var tracker_transform = path_tracker.get_global_transform().looking_at(point_pos, UP)  
 		path_tracker.set_global_transform(tracker_transform)
 
-func turn(right = true):
-	if right:
-		turn_by(self.turn_speed)
-	else:
-		turn_by(-self.turn_speed)
-		
+#func turn(right = true):
+#	if right:
+#		turn_by(self.turn_speed)
+#	else:
+#		turn_by(-self.turn_speed)
+#		
+#	is_facing_waypoint = false
+
+
+
+func turn_by(turn_radians, delta):
+	#self.rotate_y(turn_radians)
+	if(turn_radians > turn_speed):
+		turn_radians = turn_speed
+	elif(turn_radians < - turn_speed):
+		turn_radians = -turn_speed
+	
+	$armature.rotate_y(turn_radians * delta)
 	is_facing_waypoint = false
 
-func turn_by(turn_radians):
-	#self.rotate_y(turn_radians)
-	$armature.rotate_y(turn_radians)
-	
-
-func turn_to_target():
-	if not turn_to_tracker(target_tracker) && target != null && !is_facing_waypoint: 
+func turn_to_target(delta):
+	print("turn_to_target")
+	if not turn_to_tracker(target_tracker, delta) && target != null && !is_facing_waypoint: 
 		var target_origin = target.get_global_transform().origin
-		face_point(target_origin)
+		#face_point(target_origin)
 
-func turn_to_path():
-	if not turn_to_tracker(path_tracker) && path.size() > 0:
-		face_point(path[0])
+func turn_to_path(delta):
+	print("turn_to_path")
+	if not turn_to_tracker(path_tracker, delta) && path.size() > 0  && !is_facing_waypoint:
+		#face_point(path[0])
+		pass
 
-func turn_to_tracker(tracker):
+func turn_to_tracker(tracker, delta):
 	var tt_rotation = tracker.get_rotation()
+	turn_by(tt_rotation.y, delta)
+	return tt_rotation.y < -0.1 or tt_rotation.y > 0.1
+	
+	 
 	if tt_rotation.y < -0.1:
 		turn(false)
 		return true # is turning
