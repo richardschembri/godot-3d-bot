@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://addons/godot-3d-bot/BasicBot.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-3d-bot/arrow_mat.tres" type="CubeMesh" id=2]
@@ -7,6 +7,14 @@
 
 radius = 0.602921
 height = 1.46308
+
+[sub_resource type="CubeMesh" id=6]
+
+custom_aabb = AABB( 0, 0, 0, 0, 0, 0 )
+size = Vector3( 2, 2, 2 )
+subdivide_width = 0
+subdivide_height = 0
+subdivide_depth = 0
 
 [sub_resource type="SpatialMaterial" id=2]
 
@@ -159,48 +167,70 @@ linear_damp = -1.0
 angular_velocity = Vector3( 0, 0, 0 )
 angular_damp = -1.0
 script = ExtResource( 1 )
-max_speed = 0.01
-acceleration = 0.1
+max_speed = 2
+acceleration = 5
+deacceleration = 20.0
 max_strafe_speed = 0.25
 strafe_acceleration = 0.1
 turn_speed = 0.2
+character_model_path = null
 target_node_path = null
 navigation_node_path = null
+debug_path = null
 
 [node name="CollisionShape" type="CollisionShape" parent="." index="0"]
 
 transform = Transform( 1, 0, 0, 0, -4.37114e-008, -1, 0, 1, -4.37114e-008, 0, 0, 0 )
 shape = SubResource( 1 )
 disabled = false
-_sections_unfolded = [ "Transform" ]
+_sections_unfolded = [ "Transform", "Visibility" ]
 
-[node name="ray_proximity_ground" type="RayCast" parent="." index="1"]
+[node name="armature" type="Spatial" parent="." index="1"]
 
-enabled = false
+[node name="ray_proximity_ground" type="RayCast" parent="armature" index="0"]
+
+enabled = true
 exclude_parent = true
-cast_to = Vector3( 0, -1.2, 0 )
+cast_to = Vector3( 0, -6, 0 )
 collision_mask = 1
 
-[node name="ray_proximity_front" type="RayCast" parent="." index="2"]
+[node name="ray_proximity_front" type="RayCast" parent="armature" index="1"]
 
 enabled = false
 exclude_parent = true
 cast_to = Vector3( 0, 0, -2 )
 collision_mask = 1
 
-[node name="ray_sight_front" type="RayCast" parent="." index="3"]
+[node name="ray_sight_front" type="RayCast" parent="armature" index="2"]
 
 enabled = false
 exclude_parent = true
 cast_to = Vector3( 0, -1, 0 )
 collision_mask = 1
 
-[node name="target_tracker" type="Position3D" parent="." index="4"]
+[node name="debug_mesh" type="MeshInstance" parent="armature" index="3"]
 
+visible = false
+layers = 1
+material_override = null
+cast_shadow = 1
+extra_cull_margin = 0.0
+use_in_baked_light = false
+lod_min_distance = 0.0
+lod_min_hysteresis = 0.0
+lod_max_distance = 0.0
+lod_max_hysteresis = 0.0
+mesh = SubResource( 6 )
+skeleton = NodePath("..")
+material/0 = null
+
+[node name="target_tracker" type="Position3D" parent="armature" index="4"]
+
+editor/display_folded = true
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 _sections_unfolded = [ "Transform" ]
 
-[node name="tracker_arrow" type="MeshInstance" parent="target_tracker" index="0"]
+[node name="tracker_arrow" type="MeshInstance" parent="armature/target_tracker" index="0"]
 
 transform = Transform( 0.1, 0, 0, 0, 0.05, 0, 0, 0, 0.5, 0, 0, -1.5 )
 layers = 1
@@ -217,7 +247,7 @@ skeleton = NodePath("..")
 material/0 = null
 _sections_unfolded = [ "Transform" ]
 
-[node name="tracker_arrow_tip" type="MeshInstance" parent="target_tracker" index="1"]
+[node name="tracker_arrow_tip" type="MeshInstance" parent="armature/target_tracker" index="1"]
 
 transform = Transform( 0.25, 0, 0, 0, -1.5299e-008, 0.075, 0, -0.35, -3.27835e-009, 0, 0, -2.15 )
 layers = 1
@@ -234,12 +264,13 @@ skeleton = NodePath("..")
 material/0 = null
 _sections_unfolded = [ "Transform" ]
 
-[node name="path_tracker" type="Position3D" parent="." index="5"]
+[node name="path_tracker" type="Position3D" parent="armature" index="5"]
 
+editor/display_folded = true
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0 )
 _sections_unfolded = [ "Transform" ]
 
-[node name="tracker_arrow" type="MeshInstance" parent="path_tracker" index="0"]
+[node name="tracker_arrow" type="MeshInstance" parent="armature/path_tracker" index="0"]
 
 transform = Transform( 0.1, 0, 0, 0, 0.05, 0, 0, 0, 0.5, 0, 0, -1.5 )
 layers = 1
@@ -256,7 +287,7 @@ skeleton = NodePath("..")
 material/0 = null
 _sections_unfolded = [ "Transform" ]
 
-[node name="tracker_arrow_tip" type="MeshInstance" parent="path_tracker" index="1"]
+[node name="tracker_arrow_tip" type="MeshInstance" parent="armature/path_tracker" index="1"]
 
 transform = Transform( 0.25, 0, 0, 0, -1.5299e-008, 0.075, 0, -0.35, -3.27835e-009, 0, 0, -2.15 )
 layers = 1
@@ -271,6 +302,14 @@ lod_max_hysteresis = 0.0
 mesh = SubResource( 3 )
 skeleton = NodePath("..")
 material/0 = null
+_sections_unfolded = [ "Transform" ]
+
+[node name="ray_proximity_ground_path" type="RayCast" parent="armature/path_tracker/tracker_arrow_tip" index="0"]
+
+enabled = false
+exclude_parent = true
+cast_to = Vector3( 0, 0, -20 )
+collision_mask = 1
 _sections_unfolded = [ "Transform" ]
 
 
